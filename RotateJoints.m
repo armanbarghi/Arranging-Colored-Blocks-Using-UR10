@@ -16,6 +16,7 @@ function RotateJoints(id, vrep, Joints, TargetPos)
     % set joint new positions
 %     vrep.simxPauseCommunication(id, true);
     TargetPos(1) = TargetPos(1) + pi/2; %??
+    TargetPos(5) = TargetPos(5) + pi;
     for i = 1:6
         vrep.simxSetJointTargetPosition(id, Joints(i),TargetPos(i),vrep.simx_opmode_oneshot);
     end
