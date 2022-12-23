@@ -3,7 +3,7 @@ clear; clc; close all;
 %% Include Path and M.Files
 addpath('VrepConnection');
 %add python path
-reloadPy()
+% reloadPy()
 %% Start API Connection
 vrep = remApi('remoteApi'); % using the prototype file (remoteApiProto.m)
 vrep.simxFinish(-1); % just in case, close all opened connections
@@ -28,10 +28,12 @@ end
 %Frame 1
 [~, Frame1] = vrep.simxGetObjectHandle(id,'Frame1', vrep.simx_opmode_oneshot_wait);
 %Gripper
-[~, Gripper] = vrep.simxGetObjectHandle(id, 'RG2_openCloseJoint', vrep.simx_opmode_oneshot_wait); 
+
+[~,EE] = vrep.simxGetObjectHandle(id,'EE',vrep.simx_opmode_oneshot_wait);
+[~,baxter_sensor] = vrep.simxGetObjectHandle(id,'BaxterVacuumCup_sensor',vrep.simx_opmode_oneshot_wait);
 %conveyor_sensor 
 [~, conveyor_sensor] = vrep.simxGetObjectHandle(id,'conveyor__sensor', vrep.simx_opmode_oneshot_wait);
-    
+
 %% Start
 % to make sure that streaming data has reached to client at least once
 vrep.simxGetPingTime(id);
@@ -50,16 +52,34 @@ Robot.name = 'UR10';
 JointsStartingPos = [0, 0, 0, 0, 0, 0];
 %% Simulation
 [~,~,~] = vrep.simxGetVisionSensorImage2(id,Camera,0,vrep.simx_opmode_streaming);
-[~,~,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
+[~,state,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
 
 %Initialize Joint Position
 RotateJoints(id, vrep, Joints, JointsStartingPos);
-%Pick
-%color = PickNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
-color = "b";
-%Place
-PlaceCubeInBasket(Robot,Joints,id,vrep,color)
 
+CubeCounter = 0;
+while true
+    [~,state,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
+    if state == 1
+        %detect a cuboid
+        [~,Cuboid] = vrep.simxGetObjectHandle(id,strcat('Cuboid#',int2str(CubeCounter)),vrep.simx_opmode_oneshot_wait);
+        %pick
+        color = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
+        vrep.simxSetObjectIntParameter(id,Cuboid,3003,1,vrep.simx_opmode_oneshot);
+        vrep.simxSetObjectParent(id,Cuboid,EE,true,vrep.simx_opmode_oneshot);
+        CubeCounter = CubeCounter+1;
+        %go to starting point
+        RotateJoints(id, vrep, Joints, JointsStartingPos);
+        %place
+        GotoBasket(Robot,Joints,id,vrep,color)
+        %release the cuboid
+        vrep.simxSetObjectIntParameter(id,Cuboid,3003,0,vrep.simx_opmode_oneshot);
+        vrep.simxSetObjectParent(id,Cuboid,-1,true,vrep.simx_opmode_oneshot);
+        %go to starting point
+        RotateJoints(id, vrep, Joints, JointsStartingPos);
+    end
+end
+    
 %% End Simulation
 % Before closing the connection to V-REP, make sure that the last command sent out had time to arrive.
 vrep.simxGetPingTime(id);
