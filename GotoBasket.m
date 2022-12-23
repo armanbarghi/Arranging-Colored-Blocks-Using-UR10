@@ -9,7 +9,7 @@ function GotoBasket(Robot,Joints,id,vrep,color)
         x = -0.9;
         y = 0;
     end
-    z = 0.35;
+    z = 0.4;
     p = [x,y,z];
     T = transl(p);
 %     theta_x = 0;%rad2deg(2*pi*rand)

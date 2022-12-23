@@ -58,13 +58,16 @@ JointsStartingPos = [0, 0, 0, 0, 0, 0];
 RotateJoints(id, vrep, Joints, JointsStartingPos);
 
 CubeCounter = 0;
-while true
+while vrep.simxGetConnectionId(id) == 1
     [~,state,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
     if state == 1
         %detect a cuboid
         [~,Cuboid] = vrep.simxGetObjectHandle(id,strcat('Cuboid#',int2str(CubeCounter)),vrep.simx_opmode_oneshot_wait);
+        fprintf('\n%s\n',strcat('Cuboid#',int2str(CubeCounter)));
         %pick
-        color = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
+        [p,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
+        fprintf('coordinate: [%i,%i,%i]\n',p(1),p(2),p(3));
+        fprintf('color: %s\n',color);
         vrep.simxSetObjectIntParameter(id,Cuboid,3003,1,vrep.simx_opmode_oneshot);
         vrep.simxSetObjectParent(id,Cuboid,EE,true,vrep.simx_opmode_oneshot);
         CubeCounter = CubeCounter+1;
