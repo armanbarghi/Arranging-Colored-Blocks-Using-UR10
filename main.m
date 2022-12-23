@@ -47,21 +47,20 @@ for i= 1:6
 end
 Robot = SerialLink(L);
 Robot.name = 'UR10';
+JointsStartingPos = [0, 0, 0, 0, 0, 0];
 %% Simulation
 [~,~,~] = vrep.simxGetVisionSensorImage2(id,Camera,0,vrep.simx_opmode_streaming);
 [~,~,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
+
 %Initialize Joint Position
-JointsStartingPos = [0, 0, 0, 0, 0, 0];
 RotateJoints(id, vrep, Joints, JointsStartingPos);
-
-%Get Target Joints position
-TargetPos = GetNearestCubeposition(Robot,id,Camera,conveyor_sensor,vrep);
-%and move the Arm 
-RotateJoints(id, vrep, Joints, TargetPos);
-
+%Pick
+color = PickNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
+%Place
+PlaceCubeInBasket(Robot,Joints,id,vrep,color)
 
 %% End Simulation
-% Before closing the connection to V-REP, make sure that the last command sent out had time to arrive. You can guarantee this with (for example):
+% Before closing the connection to V-REP, make sure that the last command sent out had time to arrive.
 vrep.simxGetPingTime(id);
 vrep.simxFinish(id);
 

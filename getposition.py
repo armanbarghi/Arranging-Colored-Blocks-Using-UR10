@@ -1,6 +1,3 @@
-# getposition.py
-"""Python module demonstrates passing MATLAB types to Python functions"""
-
 import cv2
 import numpy as np
 
@@ -52,11 +49,11 @@ def callme():
     upper_limit_red =  np.array([180,255,255])
     x_min_red, y_min_red = getpos(frame, lower_limit_red, upper_limit_red)
     if (x_min_blue == 10000 and y_min_blue == 10000):
-        return (x_min_red,y_min_red)
+        return (x_min_red,y_min_red, 'r')
     elif(x_min_red == 10000 and  y_min_red == 10000):
-        return (x_min_blue,y_min_blue)
-    elif (y_min_blue > y_min_red): return (x_min_blue,y_min_blue)
-    elif (y_min_blue <= y_min_red): return  (x_min_red,y_min_red)
-    else: return (10000, 10000)
+        return (x_min_blue,y_min_blue, 'b')
+    elif (y_min_blue <= y_min_red): return  (x_min_red,y_min_red, 'r')
+    elif (y_min_blue > y_min_red): return (x_min_blue,y_min_blue, 'b')
+    else: return (10000, 10000, '10000')
 
 #print(callme())
