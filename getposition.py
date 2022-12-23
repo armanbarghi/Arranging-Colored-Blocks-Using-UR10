@@ -33,27 +33,37 @@ def getpos(frame, lower_limit, upper_limit):
                         min_x = cx
                         min_y = cy
     else:
-        return (10000, 10000)
+        return (-10000, -10000)
 
     return (min_x,min_y)
 
 def callme():
     frame = cv2.imread('image.png')
     #blue   
-    lower_limit_blue = np.array([32,0,0])
+    lower_limit_blue = np.array([66,0,0])
     upper_limit_blue =  np.array([180,255,255])
     x_min_blue, y_min_blue = getpos(frame, lower_limit_blue, upper_limit_blue)
 
     #red
-    lower_limit_red =   np.array([0,26,0])
-    upper_limit_red =  np.array([180,255,255])
+    lower_limit_red =   np.array([0,0,135])
+    upper_limit_red =  np.array([0,255,255])
     x_min_red, y_min_red = getpos(frame, lower_limit_red, upper_limit_red)
-    if (x_min_blue == 10000 and y_min_blue == 10000):
-        return (x_min_red,y_min_red, 'r')
-    elif(x_min_red == 10000 and  y_min_red == 10000):
-        return (x_min_blue,y_min_blue, 'b')
-    elif (y_min_blue <= y_min_red): return  (x_min_red,y_min_red, 'r')
-    elif (y_min_blue > y_min_red): return (x_min_blue,y_min_blue, 'b')
-    else: return (10000, 10000, '10000')
 
-#print(callme())
+    #green
+    lower_limit_green =   np.array([15,0,0])
+    upper_limit_green =  np.array([85,255,255])
+    x_min_green, y_min_green = getpos(frame, lower_limit_green, upper_limit_green)
+
+    if (y_min_blue >= y_min_red and y_min_blue >= y_min_green): return (x_min_blue,y_min_blue, 'b')
+    elif (y_min_red >= y_min_blue and y_min_red >= y_min_green):  return (x_min_red,y_min_red, 'r')
+    elif (y_min_green >= y_min_blue and y_min_green >= y_min_red):  return (x_min_green,y_min_green, 'g')
+    else: return (-10000, -10000, '-10000')    
+    # if (x_min_blue == 10000 and y_min_blue == 10000):
+    #     return (x_min_red,y_min_red, 'r')
+    # elif(x_min_red == 10000 and  y_min_red == 10000):
+    #     return (x_min_blue,y_min_blue, 'b')
+    # elif (y_min_blue <= y_min_red): return  (x_min_red,y_min_red, 'r')
+    # elif (y_min_blue > y_min_red): return (x_min_blue,y_min_blue, 'b')
+    # else: return (10000, 10000, '10000')
+
+# print(callme())

@@ -6,7 +6,7 @@ function [x,y,color] = GetPositionFromPy(id,Camera,conveyor_sensor,vrep)
     image = getImage(id,Camera,vrep);
     imwrite(image,'image.png')
     temp = py.getposition.callme();    
-    while (temp{1} == 10000 && temp{2} == 10000)
+    while (temp{1} == -10000 && temp{2} == -10000 && temp{3} == "-10000")
         image = getImage(id,Camera,vrep);
         imwrite(image,'image.png')
         

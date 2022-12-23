@@ -14,13 +14,11 @@ function RotateJoints(id, vrep, Joints, TargetPos)
         %add gaussian noise?
     end
     % set joint new positions
-%     vrep.simxPauseCommunication(id, true);
     TargetPos(1) = TargetPos(1) + pi/2; %??
-    TargetPos(5) = TargetPos(5) + pi;
+    TargetPos(5) =  TargetPos(5) + pi;
     for i = 1:6
         vrep.simxSetJointTargetPosition(id, Joints(i),TargetPos(i),vrep.simx_opmode_oneshot);
     end
-%      vrep.simxPauseCommunication(id, false);
     %wait until joints reach their destination
     currentPos = -ones(1,6);
     Threshold = 0.05;% threshold to check if the EE has reached its destination

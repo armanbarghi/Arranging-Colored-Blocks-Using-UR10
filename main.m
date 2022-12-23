@@ -55,7 +55,8 @@ JointsStartingPos = [0, 0, 0, 0, 0, 0];
 %Initialize Joint Position
 RotateJoints(id, vrep, Joints, JointsStartingPos);
 %Pick
-color = PickNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
+%color = PickNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
+color = "b";
 %Place
 PlaceCubeInBasket(Robot,Joints,id,vrep,color)
 
