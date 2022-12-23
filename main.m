@@ -3,7 +3,7 @@ clear; clc; close all;
 %% Include Path and M.Files
 addpath('VrepConnection');
 %add python path
-% reloadPy()
+reloadPy()
 %% Start API Connection
 vrep = remApi('remoteApi'); % using the prototype file (remoteApiProto.m)
 vrep.simxFinish(-1); % just in case, close all opened connections
@@ -59,11 +59,11 @@ RotateJoints(id, vrep, Joints, JointsStartingPos);
 
 CubeCounter = 0;
 while vrep.simxGetConnectionId(id) == 1
-    [~,state,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
+    [~,state,~,Cuboid,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
     if state == 1
-        %detect a cuboid
-        [~,Cuboid] = vrep.simxGetObjectHandle(id,strcat('Cuboid#',int2str(CubeCounter)),vrep.simx_opmode_oneshot_wait);
-        fprintf('\n%s\n',strcat('Cuboid#',int2str(CubeCounter)));
+%         %detect a cuboid
+%         [~,Cuboid] = vrep.simxGetObjectHandle(id,strcat('Cuboid#',int2str(CubeCounter)),vrep.simx_opmode_oneshot_wait);
+%         fprintf('\n%s\n',strcat('Cuboid#',int2str(CubeCounter)));
         %pick
         [p,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
         fprintf('coordinate: [%i,%i,%i]\n',p(1),p(2),p(3));

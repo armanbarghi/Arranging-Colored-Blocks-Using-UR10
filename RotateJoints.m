@@ -21,7 +21,7 @@ function RotateJoints(id, vrep, Joints, TargetPos)
     end
     %wait until joints reach their destination
     currentPos = -ones(1,6);
-    Threshold = 0.05;% threshold to check if the EE has reached its destination
+    Threshold = 0.01;% threshold to check if the EE has reached its destination
     while (max(abs(currentPos - TargetPos)) > Threshold)                        
     %Get current joint angles for each joint
         for i = 1:6
