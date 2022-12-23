@@ -2,7 +2,8 @@ clear; clc; close all;
 
 %% Include Path and M.Files
 addpath('VrepConnection');
-
+%add python path
+reloadPy()
 %% Start API Connection
 vrep = remApi('remoteApi'); % using the prototype file (remoteApiProto.m)
 vrep.simxFinish(-1); % just in case, close all opened connections
@@ -28,6 +29,8 @@ end
 [~, Frame1] = vrep.simxGetObjectHandle(id,'Frame1', vrep.simx_opmode_oneshot_wait);
 %Gripper
 [~, Gripper] = vrep.simxGetObjectHandle(id, 'RG2_openCloseJoint', vrep.simx_opmode_oneshot_wait); 
+%conveyor_sensor 
+[~, conveyor_sensor] = vrep.simxGetObjectHandle(id,'conveyor__sensor', vrep.simx_opmode_oneshot_wait);
     
 %% Start
 % to make sure that streaming data has reached to client at least once
@@ -37,7 +40,7 @@ vrep.simxStartSimulation(id, vrep.simx_opmode_oneshot_wait);
 a = [0, -0.612, -0.5723, 0, 0, 0];
 d = [0.1273, 0, 0, 0.163941, 0.1157, 0.0922];
 alpha = [1.570796327, 0, 0, 1.570796327, -1.570796327, 0];
-offset= [0, -pi/2, 0,-pi/2, 0, 0]; %??
+offset = [0, -pi/2, 0,-pi/2, 0, 0]; %??
 %Using Peter Corke robotics toolbox
 for i= 1:6
   L(i) = Link([ 0 d(i) a(i) alpha(i) 0 offset(i)], 'standard');   %?? 
@@ -45,22 +48,17 @@ end
 Robot = SerialLink(L);
 Robot.name = 'UR10';
 %% Simulation
-[~,~, image] = vrep.simxGetVisionSensorImage2(id,Camera,0,vrep.simx_opmode_streaming);
+[~,~,~] = vrep.simxGetVisionSensorImage2(id,Camera,0,vrep.simx_opmode_streaming);
+[~,~,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
 %Initialize Joint Position
 JointsStartingPos = [0, 0, 0, 0, 0, 0];
 RotateJoints(id, vrep, Joints, JointsStartingPos);
 
 %Get Target Joints position
-TargetPos = GetNearestCubeposition(Robot);
-%Then move the Arm 
+TargetPos = GetNearestCubeposition(Robot,id,Camera,conveyor_sensor,vrep);
+%and move the Arm 
 RotateJoints(id, vrep, Joints, TargetPos);
 
-%for test purpose
-% for t = 1:100
-%     [~,~,image] = vrep.simxGetVisionSensorImage2(id,Camera,0,vrep.simx_opmode_buffer);
-%     imshow(image)
-%     pause(0.001)
-% end
 
 %% End Simulation
 % Before closing the connection to V-REP, make sure that the last command sent out had time to arrive. You can guarantee this with (for example):
