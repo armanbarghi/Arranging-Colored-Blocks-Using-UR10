@@ -12,8 +12,8 @@ function [x,y,color] = GetPositionFromPy(id,Camera,conveyor_sensor,vrep)
         
         temp = py.getposition.callme();
     end
-    x = -double(temp{1}) / 650 * 0.59 + 0.295;
-    y = double(temp{2}) / 650 * 0.59 - 0.8 - 0.5086;
+    x = -double(temp{1}) / 650 * 0.58 + 0.282;
+    y = double(temp{2}) / 650 * 0.59 - 0.8 - 0.52;
     color = temp{3};
     delete 'image.png'
 end
