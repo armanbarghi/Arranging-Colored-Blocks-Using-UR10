@@ -28,7 +28,8 @@ end
 %Frame 1
 [~, Frame1] = vrep.simxGetObjectHandle(id,'Frame1', vrep.simx_opmode_oneshot_wait);
 %Gripper
-
+[~,Gripper] = vrep.simxGetObjectHandle(id, 'RG2_openCloseJoint', vrep.simx_opmode_oneshot_wait);
+[~, Gripper_sensor] = vrep.simxGetObjectHandle(id,'RG2_attachProxSensor', vrep.simx_opmode_oneshot_wait);
 [~,EE] = vrep.simxGetObjectHandle(id,'EE',vrep.simx_opmode_oneshot_wait);
 [~,baxter_sensor] = vrep.simxGetObjectHandle(id,'BaxterVacuumCup_sensor',vrep.simx_opmode_oneshot_wait);
 %conveyor_sensor 
@@ -41,7 +42,7 @@ vrep.simxStartSimulation(id, vrep.simx_opmode_oneshot_wait);
 %DH Parameters of UR10
 a = [0, -0.612, -0.5723, 0, 0, 0];
 d = [0.1273, 0, 0, 0.163941, 0.1157, 0.0922];
-alpha = [1.570796327, 0, 0, 1.570796327, -1.570796327, 0];
+alpha = [pi/2, 0, 0, pi/2, -pi/2, 0];
 offset = [0, -pi/2, 0,-pi/2, 0, 0]; %??
 %Using Peter Corke robotics toolbox
 for i= 1:6
@@ -51,33 +52,43 @@ Robot = SerialLink(L);
 Robot.name = 'UR10';
 JointsStartingPos = [0, 0, 0, 0, 0, 0];
 %% Simulation
-[~,~,~] = vrep.simxGetVisionSensorImage2(id,Camera,0,vrep.simx_opmode_streaming);
+vrep.simxGetVisionSensorImage2(id,Camera,0,vrep.simx_opmode_streaming);
 [~,state,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
+[~,state,~] = vrep.simxReadProximitySensor(id,Gripper_sensor,vrep.simx_opmode_streaming);
 
 %Initialize Joint Position
 RotateJoints(id, vrep, Joints, JointsStartingPos);
 
 CubeCounter = 0;
-while vrep.simxGetConnectionId(id) == 1
+while (vrep.simxGetConnectionId(id) == 1)
     [~,state,~,Cuboid,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
-    if state == 1
-%         %detect a cuboid
-%         [~,Cuboid] = vrep.simxGetObjectHandle(id,strcat('Cuboid#',int2str(CubeCounter)),vrep.simx_opmode_oneshot_wait);
-%         fprintf('\n%s\n',strcat('Cuboid#',int2str(CubeCounter)));
-        %pick
+    if (state == 1)
+        result = 0;
+          %pick
+        OpenGripper(id,vrep,Gripper,0.1);
         [p,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
         fprintf('coordinate: [%i,%i,%i]\n',p(1),p(2),p(3));
         fprintf('color: %s\n',color);
-        vrep.simxSetObjectIntParameter(id,Cuboid,3003,1,vrep.simx_opmode_oneshot);
-        vrep.simxSetObjectParent(id,Cuboid,EE,true,vrep.simx_opmode_oneshot);
-        CubeCounter = CubeCounter+1;
+        CloseGripper(id,vrep, Gripper,0.1);
         %go to starting point
-        RotateJoints(id, vrep, Joints, JointsStartingPos);
+        RotateJoints(id, vrep, Joints, JointsStartingPos,1);
+%         while (result == 0)
+%             OpenGripper(id,vrep,Gripper,0.1);
+%             [p,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
+%             fprintf('coordinate: [%i,%i,%i]\n',p(1),p(2),p(3));
+%             fprintf('color: %s\n',color);
+%             CloseGripper(id,vrep, Gripper,0.02);
+%             %go to starting point
+%             RotateJoints(id, vrep, Joints, JointsStartingPos, 1);
+%             [~,result,~,~,~] = vrep.simxReadProximitySensor(id,Gripper_sensor,vrep.simx_opmode_buffer);
+%         end
+        %CubeCounter = CubeCounter+1;
         %place
-        GotoBasket(Robot,Joints,id,vrep,color)
+        GotoBasket(Robot,Joints,id,vrep,color);
         %release the cuboid
-        vrep.simxSetObjectIntParameter(id,Cuboid,3003,0,vrep.simx_opmode_oneshot);
-        vrep.simxSetObjectParent(id,Cuboid,-1,true,vrep.simx_opmode_oneshot);
+        OpenGripper(id,vrep, Gripper,0.02);
+        pause(0.5);
+        CloseGripper(id,vrep, Gripper,0.1);
         %go to starting point
         RotateJoints(id, vrep, Joints, JointsStartingPos);
     end

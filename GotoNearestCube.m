@@ -5,7 +5,7 @@ function [p,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor
     % G=double(G); 
     % get position of nearest cube
     [x,y,color] = GetPositionFromPy(id,Camera,conveyor_sensor,vrep);
-    z = 0.4;
+    z = 0.6;
     p = [x,y,z];
     T = transl(p);
     theta_x = 0;%rad2deg(2*pi*rand)
@@ -16,8 +16,8 @@ function [p,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor
     TargetPos = Robot.ikunc(T,q0);%1*6 vector
     %TargetPos = Robot.ikcon(T);
     %TargetPos = Robot.ikunc(G); 
-    RotateJoints(id, vrep, Joints, TargetPos);
-%     z = 0.4
+    RotateJoints(id, vrep, Joints, TargetPos, 1);
+%     z = 0.6;
 %     p = [x;y;z]';
 %     T = transl(p);
 %     T(1:3,1:3) = RotationMatrix(theta_z,theta_y,theta_x,'ZYX',true);

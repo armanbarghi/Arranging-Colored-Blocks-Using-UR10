@@ -1,5 +1,5 @@
-function RotateJoints(id, vrep, Joints, TargetPos)
-    vrep.simxAddStatusbarMessage(id,'moving joints...',vrep.simx_opmode_oneshot);
+function RotateJoints(id, vrep, Joints, TargetPos, adjustEE)
+    vrep.simxAddStatusbarMessage(id,'moving joints.',vrep.simx_opmode_oneshot);
     for i= 1:6
         if (TargetPos(i) > pi) 
             TargetPos(i) = TargetPos(i) - 2*pi; 
@@ -15,7 +15,9 @@ function RotateJoints(id, vrep, Joints, TargetPos)
     end
     % set joint new positions
     TargetPos(1) = TargetPos(1) + pi/2; %??
-    TargetPos(5) =  TargetPos(5) + pi;
+    if (nargin == 5 && adjustEE) 
+        TargetPos(5) =  TargetPos(5) + pi;
+    end
     for i = 1:6
         vrep.simxSetJointTargetPosition(id, Joints(i),TargetPos(i),vrep.simx_opmode_oneshot);
     end
