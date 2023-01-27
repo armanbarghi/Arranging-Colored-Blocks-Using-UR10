@@ -46,15 +46,15 @@ alpha = [pi/2, 0, 0, pi/2, -pi/2, 0];
 offset = [0, -pi/2, 0,-pi/2, 0, 0]; %??
 %Using Peter Corke robotics toolbox
 for i= 1:6
-  L(i) = Link([ 0 d(i) a(i) alpha(i) 0 offset(i)], 'standard');   %?? 
+  L(i) = Link([0, d(i), a(i), alpha(i), 0, offset(i)], 'standard');   %?? 
 end
 Robot = SerialLink(L);
 Robot.name = 'UR10';
 JointsStartingPos = [0, 0, 0, 0, 0, 0];
 %% Simulation
 vrep.simxGetVisionSensorImage2(id,Camera,0,vrep.simx_opmode_streaming);
-[~,state,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
-[~,state,~] = vrep.simxReadProximitySensor(id,Gripper_sensor,vrep.simx_opmode_streaming);
+[~,~,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
+[~,~,~] = vrep.simxReadProximitySensor(id,Gripper_sensor,vrep.simx_opmode_streaming);
 
 %Initialize Joint Position
 RotateJoints(id, vrep, Joints, JointsStartingPos);
@@ -64,14 +64,14 @@ while (vrep.simxGetConnectionId(id) == 1)
     [~,state,~,Cuboid,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
     if (state == 1)
         result = 0;
-          %pick
+        %pick
         OpenGripper(id,vrep,Gripper,0.1);
         [p,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
         fprintf('coordinate: [%i,%i,%i]\n',p(1),p(2),p(3));
         fprintf('color: %s\n',color);
-        CloseGripper(id,vrep, Gripper,0.1);
+        CloseGripper(id,vrep,Gripper,0.1);
         %go to starting point
-        RotateJoints(id, vrep, Joints, JointsStartingPos,1);
+        %RotateJoints(id, vrep, Joints, JointsStartingPos,1);
 %         while (result == 0)
 %             OpenGripper(id,vrep,Gripper,0.1);
 %             [p,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
@@ -82,15 +82,15 @@ while (vrep.simxGetConnectionId(id) == 1)
 %             RotateJoints(id, vrep, Joints, JointsStartingPos, 1);
 %             [~,result,~,~,~] = vrep.simxReadProximitySensor(id,Gripper_sensor,vrep.simx_opmode_buffer);
 %         end
-        %CubeCounter = CubeCounter+1;
+        CubeCounter = CubeCounter + 1;
         %place
         GotoBasket(Robot,Joints,id,vrep,color);
         %release the cuboid
-        OpenGripper(id,vrep, Gripper,0.02);
+        OpenGripper(id,vrep,Gripper,0.02);
         pause(0.5);
-        CloseGripper(id,vrep, Gripper,0.1);
+        CloseGripper(id,vrep,Gripper,0.1);
         %go to starting point
-        RotateJoints(id, vrep, Joints, JointsStartingPos);
+        RotateJoints(id, vrep, Joints, JointsStartingPos, 1);
     end
 end
     
