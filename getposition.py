@@ -39,7 +39,7 @@ def get_pos(frame, lower_limit, upper_limit):
     frame = cv2.resize(frame, (x_res,y_res))
     contours = find_contours(frame, lower_limit, upper_limit)
     result = frame.copy()
-    cv2.drawContours(result, contours, -1, (0,255,0), 3)
+    cv2.drawContours(result, contours, -1, (255,255,255), 3)
 
     cx, cy = 0,0
     min_x, min_y = -10000,-10000 #OK?
@@ -56,7 +56,7 @@ def get_pos(frame, lower_limit, upper_limit):
                         min_x = cx
                         min_y = cy
                     cv2.circle(result, (cx, cy), 5, (255, 255, 255), -1)
-                    cv2.circle(result, (cx,cy), 10, (0,0,255), 3)
+                    cv2.circle(result, (cx,cy), 10, (0,255,255), 3)
                     
                     rotation = get_contour_angle(cnt)
                     cv2.imwrite('out.png', result)
@@ -85,4 +85,4 @@ def callme():
     if (y_min_blue >= y_min_red and y_min_blue >= y_min_green): return (x_min_blue,y_min_blue,rotation_blue,'b')
     elif (y_min_red >= y_min_blue and y_min_red >= y_min_green):  return (x_min_red,y_min_red,rotation_red,'r')
     elif (y_min_green >= y_min_blue and y_min_green >= y_min_red):  return (x_min_green,y_min_green,rotation_green,'g')
-    else: return (-10000, -10000, '-10000')  
+    else: return (-10000, -10000, -10000, '-10000')
