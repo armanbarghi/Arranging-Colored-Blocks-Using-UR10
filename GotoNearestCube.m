@@ -1,6 +1,6 @@
-function [p,rotation,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor)
+function [p,rotation,color] = GotoNearestCube(id,vrep,Robot,Joints,Camera,ConveyorSensor)
     % get position of nearest cube
-    [x,y,rotation,color] = GetPositionFromPy(id,Camera,conveyor_sensor,vrep);
+    [x,y,rotation,color] = GetPositionFromPy(id,vrep,Camera,ConveyorSensor);
     z = 0.412;
     p = [x,y,z];
     fprintf('coordinate: [%i,%i,%i] m\n',p(1),p(2),p(3));

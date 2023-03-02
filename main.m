@@ -2,7 +2,6 @@ clear; clc; close all;
 
 %% Include Paths
 addpath('VrepConnection');
-%add python path
 ReloadPy()
 
 %% Start API Connection
@@ -31,7 +30,7 @@ end
 [~,EE] = vrep.simxGetObjectHandle(id,'EE',vrep.simx_opmode_oneshot_wait);
 [~,BaxterSensor] = vrep.simxGetObjectHandle(id,'BaxterVacuumCup_sensor',vrep.simx_opmode_oneshot_wait);
 %conveyor_sensor 
-[~, ConveyorSensor] = vrep.simxGetObjectHandle(id,'conveyor__sensor', vrep.simx_opmode_oneshot_wait);
+[~,ConveyorSensor] = vrep.simxGetObjectHandle(id,'conveyor__sensor', vrep.simx_opmode_oneshot_wait);
 
 %% Start
 % to make sure that streaming data has reached to client at least once
@@ -55,22 +54,22 @@ JointsStartingPos = [0, 0, 0, 0, 0, 0];
 [~,state,~] = vrep.simxReadProximitySensor(id,ConveyorSensor,vrep.simx_opmode_streaming);
 
 %Initialize Joint Position
-RotateJoints(id, vrep, Joints, JointsStartingPos);
+RotateJoints(id,vrep,Joints,JointsStartingPos);
 
 while vrep.simxGetConnectionId(id) == 1
     [~,state,~,Cuboid,~] = vrep.simxReadProximitySensor(id,ConveyorSensor,vrep.simx_opmode_streaming);
     if state == 1
         %pick
-        [~,~,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,ConveyorSensor);
+        [~,~,color] = GotoNearestCube(id,vrep,Robot,Joints,Camera,ConveyorSensor);
         CloseVaccum(id,vrep,Cuboid,EE)
         %go to starting point
-        RotateJoints(id, vrep, Joints, JointsStartingPos);
+        RotateJoints(id,vrep,Joints,JointsStartingPos);
         %place
-        GotoBasket(Robot,Joints,id,vrep,color)
+        GotoBasket(id,vrep,Robot,Joints,color)
         %release the cuboid
         OpenVaccum(id,vrep,Cuboid) 
         %go to starting point
-        RotateJoints(id, vrep, Joints, JointsStartingPos);
+        RotateJoints(id,vrep,Joints,JointsStartingPos);
     end
 end
     

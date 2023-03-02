@@ -1,4 +1,4 @@
-function GotoBasket(Robot,Joints,id,vrep,color)
+function GotoBasket(id,vrep,Robot,Joints,color)
     if (color == "r")
         x = 0.9;
         y = 0;

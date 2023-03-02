@@ -1,15 +1,14 @@
-function [x,y,rotation,color] = GetPositionFromPy(id,Camera,conveyor_sensor,vrep)
+function [x,y,rotation,color] = GetPositionFromPy(id,vrep,Camera,ConveyorSensor)
     result = 0;
     while (result == 0)
-        [~,result,~,~,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_buffer);
+        [~,result,~,~,~] = vrep.simxReadProximitySensor(id,ConveyorSensor,vrep.simx_opmode_buffer);
     end
-    image = GetImage(id,Camera,vrep);
+    image = GetImage(id,vrep,Camera);
     imwrite(image,'image.png')
-    temp = py.GetPosition.callme();    
-    while (temp{1} == -10000 && temp{2} == -10000 && temp{3} == "-10000")
-        image = GetImage(id,Camera,vrep);
+    temp = py.GetPosition.callme();
+    while (temp{1} == -10000 && temp{2} == -10000 && temp{4} == "-10000")
+        image = GetImage(id,vrep,Camera);
         imwrite(image,'image.png')
-        
         temp = py.GetPosition.callme();
     end
     rotation = temp{3};
