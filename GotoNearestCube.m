@@ -5,7 +5,7 @@ function [p,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor
     % G=double(G); 
     % get position of nearest cube
     [x,y,color] = GetPositionFromPy(id,Camera,conveyor_sensor,vrep);
-    z = 0.4;
+    z = 0.412;
     p = [x,y,z];
     T = transl(p);
     theta_x = 0;%rad2deg(2*pi*rand)
