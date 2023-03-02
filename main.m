@@ -1,9 +1,10 @@
 clear; clc; close all;
 
-%% Include Path and M.Files
+%% Include Paths
 addpath('VrepConnection');
 %add python path
-reloadPy()
+ReloadPy()
+
 %% Start API Connection
 vrep = remApi('remoteApi'); % using the prototype file (remoteApiProto.m)
 vrep.simxFinish(-1); % just in case, close all opened connections
@@ -13,7 +14,6 @@ if (id < 0)
     vrep.delete();
     return;
 end
-
 fprintf('Connection %d to remote API server open.\n', id);
 
 %% Get Objects Handle 
@@ -26,13 +26,12 @@ for i = 1:6
     [~,Joints(i)] = vrep.simxGetObjectHandle(id, JointNames{i}, vrep.simx_opmode_oneshot_wait); 
 end
 %Frame 1
-[~, Frame1] = vrep.simxGetObjectHandle(id,'Frame1', vrep.simx_opmode_oneshot_wait);
+[~,Frame1] = vrep.simxGetObjectHandle(id,'Frame1', vrep.simx_opmode_oneshot_wait);
 %Gripper
-
 [~,EE] = vrep.simxGetObjectHandle(id,'EE',vrep.simx_opmode_oneshot_wait);
-[~,baxter_sensor] = vrep.simxGetObjectHandle(id,'BaxterVacuumCup_sensor',vrep.simx_opmode_oneshot_wait);
+[~,BaxterSensor] = vrep.simxGetObjectHandle(id,'BaxterVacuumCup_sensor',vrep.simx_opmode_oneshot_wait);
 %conveyor_sensor 
-[~, conveyor_sensor] = vrep.simxGetObjectHandle(id,'conveyor__sensor', vrep.simx_opmode_oneshot_wait);
+[~, ConveyorSensor] = vrep.simxGetObjectHandle(id,'conveyor__sensor', vrep.simx_opmode_oneshot_wait);
 
 %% Start
 % to make sure that streaming data has reached to client at least once
@@ -41,7 +40,7 @@ vrep.simxStartSimulation(id, vrep.simx_opmode_oneshot_wait);
 %DH Parameters of UR10
 a = [0, -0.612, -0.5723, 0, 0, 0];
 d = [0.1273, 0, 0, 0.163941, 0.1157, 0.0922];
-alpha = [1.570796327, 0, 0, 1.570796327, -1.570796327, 0];
+alpha = [pi/2, 0, 0, pi/2, -pi/2, 0];
 offset = [0, -pi/2, 0,-pi/2, 0, 0]; %??
 %Using Peter Corke robotics toolbox
 for i= 1:6
@@ -50,34 +49,26 @@ end
 Robot = SerialLink(L);
 Robot.name = 'UR10';
 JointsStartingPos = [0, 0, 0, 0, 0, 0];
+
 %% Simulation
 [~,~,~] = vrep.simxGetVisionSensorImage2(id,Camera,0,vrep.simx_opmode_streaming);
-[~,state,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
+[~,state,~] = vrep.simxReadProximitySensor(id,ConveyorSensor,vrep.simx_opmode_streaming);
 
 %Initialize Joint Position
 RotateJoints(id, vrep, Joints, JointsStartingPos);
 
-CubeCounter = 0;
 while vrep.simxGetConnectionId(id) == 1
-    [~,state,~,Cuboid,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
+    [~,state,~,Cuboid,~] = vrep.simxReadProximitySensor(id,ConveyorSensor,vrep.simx_opmode_streaming);
     if state == 1
-%         %detect a cuboid
-%         [~,Cuboid] = vrep.simxGetObjectHandle(id,strcat('Cuboid#',int2str(CubeCounter)),vrep.simx_opmode_oneshot_wait);
-%         fprintf('\n%s\n',strcat('Cuboid#',int2str(CubeCounter)));
         %pick
-        [p,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
-        fprintf('coordinate: [%i,%i,%i]\n',p(1),p(2),p(3));
-        fprintf('color: %s\n',color);
-        vrep.simxSetObjectIntParameter(id,Cuboid,3003,1,vrep.simx_opmode_oneshot);
-        vrep.simxSetObjectParent(id,Cuboid,EE,true,vrep.simx_opmode_oneshot);
-        CubeCounter = CubeCounter+1;
+        [~,~,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,ConveyorSensor);
+        CloseVaccum(id,vrep,Cuboid,EE)
         %go to starting point
         RotateJoints(id, vrep, Joints, JointsStartingPos);
         %place
         GotoBasket(Robot,Joints,id,vrep,color)
         %release the cuboid
-        vrep.simxSetObjectIntParameter(id,Cuboid,3003,0,vrep.simx_opmode_oneshot);
-        vrep.simxSetObjectParent(id,Cuboid,-1,true,vrep.simx_opmode_oneshot);
+        OpenVaccum(id,vrep,Cuboid) 
         %go to starting point
         RotateJoints(id, vrep, Joints, JointsStartingPos);
     end
