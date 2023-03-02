@@ -1,4 +1,4 @@
-function GotoBasket(Robot,Joints,id,vrep,color)
+function GotoBasket(id,vrep,Robot,Joints,color)
     if (color == "r")
         x = 0.9;
         y = 0;
@@ -12,7 +12,7 @@ function GotoBasket(Robot,Joints,id,vrep,color)
         y = 0;
         q0 = [0 0 0 0 0 0];
     end
-    z = 0.76;
+    z = 0.8;
     p = [x,y,z];
     T = transl(p);
 %      theta_x = 0;%rad2deg(2*pi*rand)

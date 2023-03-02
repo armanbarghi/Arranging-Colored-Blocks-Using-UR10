@@ -1,9 +1,9 @@
 clear; clc; close all;
 
-%% Include Path and M.Files
+%% Include Paths
 addpath('VrepConnection');
-%add python path
-reloadPy()
+ReloadPy()
+
 %% Start API Connection
 vrep = remApi('remoteApi'); % using the prototype file (remoteApiProto.m)
 vrep.simxFinish(-1); % just in case, close all opened connections
@@ -13,7 +13,6 @@ if (id < 0)
     vrep.delete();
     return;
 end
-
 fprintf('Connection %d to remote API server open.\n', id);
 
 %% Get Objects Handle 
@@ -26,14 +25,12 @@ for i = 1:6
     [~,Joints(i)] = vrep.simxGetObjectHandle(id, JointNames{i}, vrep.simx_opmode_oneshot_wait); 
 end
 %Frame 1
-[~, Frame1] = vrep.simxGetObjectHandle(id,'Frame1', vrep.simx_opmode_oneshot_wait);
+[~,Frame1] = vrep.simxGetObjectHandle(id,'Frame1', vrep.simx_opmode_oneshot_wait);
 %Gripper
 [~,Gripper] = vrep.simxGetObjectHandle(id, 'RG2_openCloseJoint', vrep.simx_opmode_oneshot_wait);
-[~, Gripper_sensor] = vrep.simxGetObjectHandle(id,'RG2_attachProxSensor', vrep.simx_opmode_oneshot_wait);
-[~,EE] = vrep.simxGetObjectHandle(id,'EE',vrep.simx_opmode_oneshot_wait);
-[~,baxter_sensor] = vrep.simxGetObjectHandle(id,'BaxterVacuumCup_sensor',vrep.simx_opmode_oneshot_wait);
+[~,GripperSensor] = vrep.simxGetObjectHandle(id,'RG2_attachProxSensor', vrep.simx_opmode_oneshot_wait);
 %conveyor_sensor 
-[~, conveyor_sensor] = vrep.simxGetObjectHandle(id,'conveyor__sensor', vrep.simx_opmode_oneshot_wait);
+[~,ConveyorSensor] = vrep.simxGetObjectHandle(id,'conveyor__sensor', vrep.simx_opmode_oneshot_wait);
 
 %% Start
 % to make sure that streaming data has reached to client at least once
@@ -51,46 +48,32 @@ end
 Robot = SerialLink(L);
 Robot.name = 'UR10';
 JointsStartingPos = [0, 0, 0, 0, 0, 0];
+
 %% Simulation
 vrep.simxGetVisionSensorImage2(id,Camera,0,vrep.simx_opmode_streaming);
-[~,~,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
-[~,~,~] = vrep.simxReadProximitySensor(id,Gripper_sensor,vrep.simx_opmode_streaming);
+[~,~,~] = vrep.simxReadProximitySensor(id,ConveyorSensor,vrep.simx_opmode_streaming);
+[~,~,~] = vrep.simxReadProximitySensor(id,GripperSensor,vrep.simx_opmode_streaming);
 
 %Initialize Joint Position
 RotateJoints(id, vrep, Joints, JointsStartingPos);
 
-CubeCounter = 0;
 while (vrep.simxGetConnectionId(id) == 1)
-    [~,state,~,Cuboid,~] = vrep.simxReadProximitySensor(id,conveyor_sensor,vrep.simx_opmode_streaming);
+    [~,state,~,Cuboid,~] = vrep.simxReadProximitySensor(id,ConveyorSensor,vrep.simx_opmode_streaming);
     if (state == 1)
         result = 0;
         %pick
         OpenGripper(id,vrep,Gripper,0.1);
-        [p,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
-        fprintf('coordinate: [%i,%i,%i]\n',p(1),p(2),p(3));
-        fprintf('color: %s\n',color);
+        [~,~,color] = GotoNearestCube(id,vrep,Robot,Joints,Camera,ConveyorSensor);
         CloseGripper(id,vrep,Gripper,0.1);
         %go to starting point
-        %RotateJoints(id, vrep, Joints, JointsStartingPos,1);
-%         while (result == 0)
-%             OpenGripper(id,vrep,Gripper,0.1);
-%             [p,color] = GotoNearestCube(Robot,Joints,id,vrep,Camera,conveyor_sensor);
-%             fprintf('coordinate: [%i,%i,%i]\n',p(1),p(2),p(3));
-%             fprintf('color: %s\n',color);
-%             CloseGripper(id,vrep, Gripper,0.02);
-%             %go to starting point
-%             RotateJoints(id, vrep, Joints, JointsStartingPos, 1);
-%             [~,result,~,~,~] = vrep.simxReadProximitySensor(id,Gripper_sensor,vrep.simx_opmode_buffer);
-%         end
-        CubeCounter = CubeCounter + 1;
+        RotateJoints(id,vrep,Joints,JointsStartingPos,1);
         %place
-        GotoBasket(Robot,Joints,id,vrep,color);
+        GotoBasket(id,vrep,Robot,Joints,color)
         %release the cuboid
-        OpenGripper(id,vrep,Gripper,0.02);
-        pause(0.5);
+        OpenGripper(id,vrep,Gripper,0.1);
         CloseGripper(id,vrep,Gripper,0.1);
         %go to starting point
-        RotateJoints(id, vrep, Joints, JointsStartingPos, 1);
+        RotateJoints(id,vrep,Joints,JointsStartingPos,1);
     end
 end
     
