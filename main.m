@@ -1,8 +1,9 @@
 clear; clc; close all;
 
 %% Include Paths
-addpath('VrepConnection');
-ReloadPy()
+addpath('Vrep Connection');
+addpath('Matlab Functions');
+ReloadPy();
 
 %% Start API Connection
 vrep = remApi('remoteApi'); % using the prototype file (remoteApiProto.m)
@@ -65,8 +66,6 @@ while (vrep.simxGetConnectionId(id) == 1)
         OpenGripper(id,vrep,Gripper,0.1);
         [~,~,color] = GotoNearestCube(id,vrep,Robot,Joints,Camera,ConveyorSensor);
         CloseGripper(id,vrep,Gripper,0.1);
-        %go to starting point
-        RotateJoints(id,vrep,Joints,JointsStartingPos,1);
         %place
         GotoBasket(id,vrep,Robot,Joints,color)
         %release the cuboid
