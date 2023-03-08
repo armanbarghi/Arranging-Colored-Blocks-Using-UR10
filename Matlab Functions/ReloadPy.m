@@ -1,4 +1,5 @@
 function ReloadPy()
+    %reload python (opencv) module
     terminate(pyenv)  
     if (count(py.sys.path,'Python Functions') == 0)
         insert(py.sys.path,int32(0),'Python Functions');

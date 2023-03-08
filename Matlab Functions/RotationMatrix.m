@@ -1,4 +1,5 @@
 function R = RotationMatrix(alpha, beta, gamma, type, fixed)
+    %returns rotation matrix based on convention specified by type
     alpha = deg2rad(alpha);
     beta = deg2rad(beta);
     gamma = deg2rad(gamma);

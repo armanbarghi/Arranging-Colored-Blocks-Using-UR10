@@ -15,11 +15,7 @@ function GotoBasket(id,vrep,Robot,Joints,color)
     z = 0.75;
     p = [x,y,z];
     T = transl(p);
-%      theta_x = 0;%rad2deg(2*pi*rand)
-%     theta_y = 0;%rad2deg(2*pi*rand)
-%     theta_z = 0;%rad2deg(2*pi*rand)
-%     T(1:3,1:3) = RotationMatrix(theta_z,theta_y,theta_x,'ZYX',true);
-    
+    %q0 is an initial guess
     TargetPos = Robot.ikunc(T,q0);
     RotateJoints(id, vrep, Joints, TargetPos, 1);
 end
