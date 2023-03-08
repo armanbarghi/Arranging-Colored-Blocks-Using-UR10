@@ -28,7 +28,7 @@ def find_contours(frame, lower_limit, upper_limit):
     blur = cv2.GaussianBlur(frame,(3,3),0)
     #Resize and coverting BGR to HSV
     hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
-    #Finding the range in image`
+    #Finding the range in image
     out = cv2.inRange(hsv, lower_limit, upper_limit)
     dilated = cv2.dilate(out, cv2.getStructuringElement(cv2.MORPH_RECT,ksize=(3,3)))
     contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -42,7 +42,7 @@ def get_pos(frame, lower_limit, upper_limit):
     cv2.drawContours(result, contours, -1, (255,255,255), 3)
 
     cx, cy = 0,0
-    min_x, min_y = -10000,-10000 #OK?
+    min_x, min_y = -10000,-10000
     rotation = -10000;
     if len(contours) > 0:
         for _,cnt in enumerate(contours):           
@@ -52,7 +52,7 @@ def get_pos(frame, lower_limit, upper_limit):
                 if area>500:
                     cx = int(M['m10']/M['m00'])
                     cy = int(M['m01']/M['m00'])
-                    if (cy > min_y): #OK?
+                    if (cy > min_y): 
                         min_x = cx
                         min_y = cy
                     cv2.circle(result, (cx, cy), 5, (255, 255, 255), -1)
@@ -66,7 +66,9 @@ def get_pos(frame, lower_limit, upper_limit):
     return (min_x,min_y,rotation)
 
 def callme():
+    # matlab calls this function and this function return nearest cube position or -10000 if no cube found.
     frame = cv2.imread('image.png')
+    
     #blue   
     lower_limit_blue = np.array([66,0,0])
     upper_limit_blue =  np.array([180,255,255])

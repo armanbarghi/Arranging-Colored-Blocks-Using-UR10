@@ -37,29 +37,32 @@ end
 % to make sure that streaming data has reached to client at least once
 vrep.simxGetPingTime(id);
 vrep.simxStartSimulation(id, vrep.simx_opmode_oneshot_wait);
+
 %DH Parameters of UR10
 a = [0, -0.612, -0.5723, 0, 0, 0];
 d = [0.1273, 0, 0, 0.163941, 0.1157, 0.0922];
 alpha = [pi/2, 0, 0, pi/2, -pi/2, 0];
-offset = [0, -pi/2, 0,-pi/2, 0, 0]; %??
+offset = [0, -pi/2, 0, -pi/2, 0, 0]; 
+
 %Using Peter Corke robotics toolbox
 for i= 1:6
-  L(i) = Link([ 0 d(i) a(i) alpha(i) 0 offset(i)], 'standard');   %?? 
+    L(i) = Link('d', d(i), 'a', a(i), 'alpha', alpha(i), 'offset', offset(i));
 end
 Robot = SerialLink(L);
 Robot.name = 'UR10';
 JointsStartingPos = [0, 0, 0, 0, 0, 0];
 
 %% Simulation
-[~,~,~] = vrep.simxGetVisionSensorImage2(id,Camera,0,vrep.simx_opmode_streaming);
-[~,~,~] = vrep.simxReadProximitySensor(id,ConveyorSensor,vrep.simx_opmode_streaming);
+%initialize sensors
+vrep.simxGetVisionSensorImage2(id,Camera,0,vrep.simx_opmode_streaming);
+vrep.simxReadProximitySensor(id,ConveyorSensor,vrep.simx_opmode_streaming);
 
 %Initialize Joint Position
 RotateJoints(id,vrep,Joints,JointsStartingPos);
 
 while (vrep.simxGetConnectionId(id) == 1)
     [~,state,~,Cuboid,~] = vrep.simxReadProximitySensor(id,ConveyorSensor,vrep.simx_opmode_streaming);
-    if (state == 1)
+    if (state == 1) %if there is cube in front of Conveyor Sensor go and pick it
         %pick
         [~,~,color] = GotoNearestCube(id,vrep,Robot,Joints,Camera,ConveyorSensor);
         CloseVaccum(id,vrep,Cuboid,EE)

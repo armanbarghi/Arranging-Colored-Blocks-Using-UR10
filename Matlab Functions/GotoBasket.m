@@ -14,7 +14,8 @@ function GotoBasket(id,vrep,Robot,Joints,color)
     end
     z = 0.65;
     p = [x,y,z];
-    T = transl(p);    
+    T = transl(p);
+    %q0 is an initial guess
     TargetPos = Robot.ikunc(T,q0);
     RotateJoints(id, vrep, Joints, TargetPos);
 end
