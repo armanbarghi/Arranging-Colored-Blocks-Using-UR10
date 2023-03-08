@@ -4,5 +4,5 @@ The goal of this project is to automate the separation of colored blocks in a pr
 To move the robot's joints to the correct position for pick-and-place operation, we calculate the angles using inverse kinematics equations in MATLAB based on the cube's information. These angles are then sent to the CoppeliaSim environment. Finally, a PID controller is used to guide the robot's end effector to the desired position, where it can perform the pick-and-place operation.
 
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/49754064/223788896-1e75045a-37e8-41ac-a6e9-2231258b2618.gif" />
+  <img src="https://user-images.githubusercontent.com/49754064/223809965-c96430d3-8097-46d3-a2ef-50ce69a804e6.gif"/>
 </p>
